@@ -1,5 +1,5 @@
-from flask import Flask, render_template
-from subprocess import call
+from flask import Flask, render_template, request
+from subprocess import check_output
 
 INPUTTEXT_ADDR = 'input.txt'
 DICTIONARY_ADDR = 'wordlist.txt'
@@ -14,9 +14,8 @@ users = []
 
 def is_user(the_user):
     for a_user in users:
-        if a_user == the_user:
-            return True
-    return False
+        if a_user.username == the_user.username:
+            return a_user
 
 app = Flask(__name__)
 
@@ -31,14 +30,16 @@ def welcome():
 @app.route('/spell_check', methods=['GET', 'POST'])
 def spell_check():
     error = None
+    textout = None
     if (request.method == 'POST'):
         inputtext = request.form['inputtext']
         inputtext_file = open(INPUTTEXT_ADDR, 'w')
-        inputtext_file.write('inputtext')
+        inputtext_file.write(inputtext)
         inputtext_file.close()
-        response = call(['spell_check', INPUTTEXT_ADDR, DICTIONARY_ADDR])
-#not finished, add handler for actually posting results
-    return render_template('spell_check.html', error=error)
+        textout=inputtext
+        misspelled = check_output(['./a.out', INPUTTEXT_ADDR, DICTIONARY_ADDR]).decode('utf-8')
+        misspelled = misspelled.replace('\n', ',').strip(',')
+    return render_template('spell_check.html', textout=textout, misspelled=misspelled)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -47,18 +48,23 @@ def login():
         username = request.form['username']
         password = request.form['password']
         phone = request.form['phone']
-        if (!username):
+        if not username:
             error = 'invalid username'
-        else if (!password):
+        elif not password:
             error = 'invalid password'
-        else if (!phone):
+        elif not phone:
             error = 'invalid phone'
-        else
+        else:
             user = User(username, password, phone)
-            if (!is_user(user)):
-                error = 'not a registered user'
+            maybe_the_user = is_user(user)
+            if not maybe_the_user:
+                error = 'Incorrect'
+            elif (maybe_the_user.password != user.password):
+                error = 'Incorrect'
+            elif (maybe_the_user.phone != user.phone):
+                error = 'Two-factor failure'
             else:
-                return redirect(url_for('spell_check'))
+                error = 'success'
     return render_template('login.html', error=error)
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -68,15 +74,19 @@ def register():
         username = request.form['username']
         password = request.form['password']
         phone = request.form['phone']
-        if (!username):
+        if not username:
             error = 'invalid username'
-        else if (!password):
+        elif not password:
             error = 'invalid password'
-        else if (!phone):
+        elif not phone:
             error = 'invalid phone'
         else:
-            users.append(User(username, password, phone))
-            return redirect(url_for('login'))
+            user = User(username, password, phone)
+            if not is_user(user):
+                users.append(user)
+                error = 'success'
+            else:
+                error = 'failure'
     return render_template('register.html', error=error)
 
 if (__name__ == '__main__'):
