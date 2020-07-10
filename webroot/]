@@ -1,11 +1,8 @@
-from flask import Flask, render_template, request, make_response, session
-from flask_wtf.csrf import CSRFProtect
+from flask import Flask, render_template, request, make_response
 from subprocess import check_output
-import os
 
 INPUTTEXT_ADDR = 'input.txt'
 DICTIONARY_ADDR = 'wordlist.txt'
-SECRET_KEY = os.urandom(32)
 
 class User:
     def __init__(self, username, password, phone):
@@ -22,9 +19,6 @@ def get_user(the_user):
             return a_user
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = SECRET_KEY
-app.secret_key = SECRET_KEY
-csrf = CSRFProtect(app)
 
 @app.route('/spell_check', methods=['GET', 'POST'])
 def spell_check():
@@ -66,7 +60,6 @@ def login():
                 error = 'Two-factor failure'
             else:
                 error = 'success'
-                maybe_the_user.is_logged_in = True
     response = make_response(render_template('login.html', error=error))
     response.headers['Content-Security-Policy'] = "default-src 'self'"
     return response
