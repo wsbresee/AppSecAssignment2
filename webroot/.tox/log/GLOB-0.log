@@ -1,3 +1,0 @@
-action: GLOB, msg: packaging
-cwd: /home/willy/AppSecAssignment2/webroot
-cmd: /usr/bin/python3 setup.py sdist --formats=zip --dist-dir /home/willy/AppSecAssignment2/webroot/.tox/dist

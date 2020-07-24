@@ -28,6 +28,10 @@ app.config.update(PERMANENT_SESSION_LIFETIME=600)
 app.secret_key = SECRET_KEY
 csrf = CSRFProtect(app)
 
+@app.route('/')
+def index():
+    return login();
+
 @app.route('/spell_check', methods=['GET', 'POST'])
 def spell_check():
     textout = None
@@ -59,6 +63,7 @@ def spell_check():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    print("log in function")
     error = None
     if (request.method == 'POST'):
         username = request.form['username']

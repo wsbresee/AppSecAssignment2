@@ -4,16 +4,14 @@
     </head>
     <body>
         <div class="container">
-            <form action="" method="post">
+            <form action="" method="POST">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                <input id=uname type="text" placeholder="Username" name="username" value="{{ request.form.username }}">
-                <input id=pword type="password" placeholder="Password" name="password" value="{{ request.form.password }}">
-                <input id=2fa type="text" placeholder="Phone" name="phone" value="{{ request.form.phone }}">
+                <input id=uname type="text" name="uname" value="{{ request.form.username }}">
+                <input id=pword type="password" name="pword" value="{{ request.form.password }}">
+                <input id=2fa type="text" name="2fa" value="{{ request.form.phone }}">
                 <input class="btn btn-default" type="submit" value="Login">
             </form>
-            {% if error %}
-                <p id=result>{{ error }}</p>
-            {% endif %}
+            <p id=result>{{ error }}</p>
         </div>
     </body>
 </html>
