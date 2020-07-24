@@ -3,17 +3,15 @@
         <h1>Please register</h1>
     </head>
     <body>
-        <div>
-            <form action="" method="post">
+        <div class="container">
+            <form action="" method="POST">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                <input id=uname type="text" placeholder="Username" name="username" value="{{ request.form.username }}">
-                <input id=pword type="password" placeholder="Password" name="password" value="{{ request.form.password }}">
-                <input id=2fa type="text" placeholder="Phone" name="phone" value="{{ request.form.phone }}">
-                <input class="btn btn-default" type="submit" value="Register">
+                <INPUT SIZE=32 id=uname type="text" name="uname" TYPE='text'/><p/>
+                <INPUT SIZE=32 id=pword type="password" name="pword" TYPE='text'/><p/>
+                <INPUT SIZE=32 id=2fa type="text" name="2fa" TYPE='text'><p/>
+                <button id="registerbutton" type="submit">Search</button>
             </form>
-            {% if error %}
-                <p id=success>{{ error }}</p>
-            {% endif %}
+            <p id=success>{{ error }}</p>
         </div>
     </body>
 </html>

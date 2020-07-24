@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, make_response, session
+from flask import Flask, render_template, request, make_response, session, escape
 from flask_wtf.csrf import CSRFProtect
 from subprocess import check_output
 import os
@@ -22,15 +22,12 @@ def get_user(the_user):
             return a_user
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = SECRET_KEY
-app.config.update(SESSION_COOKIE_SECURE=True, SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SAMESITE='Lax')
-app.config.update(PERMANENT_SESSION_LIFETIME=600)
-app.secret_key = SECRET_KEY
+app.secret_key = os.urandom(32)
 csrf = CSRFProtect(app)
 
 @app.route('/')
 def index():
-    return login();
+    return redirect(url_for('register'))
 
 @app.route('/spell_check', methods=['GET', 'POST'])
 def spell_check():
@@ -55,10 +52,6 @@ def spell_check():
         else:
             textout = "Invalid user. Please log in."
     response = make_response(render_template('spell_check.html', textout=textout, misspelled=misspelled))
-    response.headers['Content-Security-Policy'] = "default-src 'self'"
-    response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
-    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
-    response.headers['X-XSS-Protection'] = '1; mode=block'
     return response
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -66,9 +59,9 @@ def login():
     print("log in function")
     error = None
     if (request.method == 'POST'):
-        username = request.form['username']
-        password = request.form['password']
-        phone = request.form['phone']
+        username = escape(request.form['uname'])
+        password = escape(request.form['pword'])
+        phone = escape(request.form['2fa'])
         if not username:
             error = 'invalid username'
         elif not password:
@@ -91,19 +84,15 @@ def login():
                 session['phone'] = phone
                 maybe_the_user.is_logged_in = True
     response = make_response(render_template('login.html', error=error))
-    response.headers['Content-Security-Policy'] = "default-src 'self'"
-    response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
-    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
-    response.headers['X-XSS-Protection'] = '1; mode=block'
     return response
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     error = None
     if (request.method == 'POST'):
-        username = request.form['username']
-        password = request.form['password']
-        phone = request.form['phone']
+        username = escape(request.form['uname'])
+        password = escape(request.form['pword'])
+        phone = escape(request.form['2fa'])
         if not username:
             error = 'invalid username'
         elif not password:
@@ -118,10 +107,6 @@ def register():
             else:
                 error = 'failure'
     response = make_response(render_template('register.html', error=error))
-    response.headers['Content-Security-Policy'] = "default-src 'self'"
-    response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
-    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
-    response.headers['X-XSS-Protection'] = '1; mode=block'
     return response
 
 if (__name__ == '__main__'):
